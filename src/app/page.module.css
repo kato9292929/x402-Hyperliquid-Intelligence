@@ -1,0 +1,493 @@
+.main {
+  min-height: 100vh;
+  background: var(--bg);
+  padding: 0 0 4rem;
+}
+
+/* Header */
+.header {
+  border-bottom: 1px solid var(--border);
+  padding: 1.5rem 2rem;
+  background: linear-gradient(180deg, #0f0f0f 0%, var(--bg) 100%);
+}
+
+.headerTop {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.logoArea {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.logo {
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--gold);
+  text-shadow: 0 0 30px rgba(200, 169, 110, 0.3);
+}
+
+.liveBadge {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--green);
+  background: rgba(0, 255, 136, 0.08);
+  border: 1px solid rgba(0, 255, 136, 0.2);
+  border-radius: 4px;
+  padding: 0.25rem 0.6rem;
+}
+
+.subtitle {
+  font-size: 0.9rem;
+  color: #888;
+  letter-spacing: 0.02em;
+}
+
+/* Stats Row */
+.statsRow {
+  max-width: 1400px;
+  margin: 1.5rem auto;
+  padding: 0 2rem;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1rem;
+}
+
+.statCard {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+}
+
+.statLabel {
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.statValue {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text);
+  font-family: 'Courier New', monospace;
+}
+
+/* Sections */
+.section {
+  max-width: 1400px;
+  margin: 2rem auto;
+  padding: 0 2rem;
+}
+
+.sectionTitle {
+  font-size: 0.85rem;
+  letter-spacing: 0.15em;
+  color: var(--muted);
+  font-weight: 500;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+}
+
+/* Token Grid */
+.tokenGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1rem;
+}
+
+.tokenCard {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  transition: border-color 0.2s;
+}
+
+.tokenCard:hover {
+  border-color: rgba(200, 169, 110, 0.3);
+}
+
+.tokenHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tokenName {
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--gold);
+}
+
+.biasBadge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.tokenPrice {
+  font-size: 1.3rem;
+  font-weight: 600;
+  font-family: 'Courier New', monospace;
+  color: var(--text);
+}
+
+/* Bias Bar */
+.biasBarLabel {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.biasBar {
+  height: 4px;
+  background: rgba(255, 68, 68, 0.3);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.biasBarFill {
+  height: 100%;
+  background: var(--green);
+  border-radius: 2px;
+  transition: width 0.5s ease;
+}
+
+/* Metrics */
+.tokenMetrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.metric {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.metricLabel {
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.metricValue {
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-family: 'Courier New', monospace;
+  color: var(--text);
+}
+
+.analyzeBtn {
+  margin-top: 0.25rem;
+  background: transparent;
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  padding: 0.5rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  font-family: 'Outfit', sans-serif;
+  transition: all 0.2s;
+  width: 100%;
+}
+
+.analyzeBtn:hover {
+  background: rgba(200, 169, 110, 0.1);
+}
+
+.analyzeBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Loading */
+.loadingRow {
+  padding: 2rem;
+  text-align: center;
+}
+
+/* Analysis Card */
+.analysisCard {
+  background: var(--card);
+  border: 1px solid rgba(200, 169, 110, 0.3);
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.analysisHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.bigBias {
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.biasStrength {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.analysisTime {
+  font-size: 0.7rem;
+  color: var(--muted);
+  font-family: 'Courier New', monospace;
+}
+
+.analysisGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--card2);
+  border-radius: 8px;
+}
+
+.analysisMetric {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.polymarketQ {
+  font-size: 0.8rem;
+  color: #888;
+  padding: 0.75rem 1rem;
+  background: rgba(200, 169, 110, 0.05);
+  border-left: 2px solid var(--gold);
+  border-radius: 4px;
+}
+
+.signals {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.signalList {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.signalItem {
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.analysisText {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.analysisText p {
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: #ccc;
+}
+
+.confidence {
+  font-size: 0.8rem;
+  color: var(--muted);
+  text-align: right;
+  font-family: 'Courier New', monospace;
+}
+
+/* Hyperps */
+.hyperpsCard {
+  background: var(--card);
+  border: 1px solid rgba(200, 169, 110, 0.2);
+  border-radius: 10px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.hyperpsDesc {
+  font-size: 0.85rem;
+  color: #888;
+  line-height: 1.6;
+}
+
+.hyperpsBtn {
+  align-self: flex-start;
+  background: rgba(200, 169, 110, 0.1);
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  padding: 0.6rem 1.25rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  font-family: 'Outfit', sans-serif;
+  transition: all 0.2s;
+}
+
+.hyperpsBtn:hover {
+  background: rgba(200, 169, 110, 0.2);
+}
+
+/* Terminal */
+.terminal {
+  background: #050505;
+  border: 1px solid #1a1a1a;
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  min-height: 120px;
+  max-height: 200px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+/* Pricing */
+.pricingToggle {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  font-family: 'Outfit', sans-serif;
+  margin-bottom: 1rem;
+  transition: all 0.2s;
+}
+
+.pricingToggle:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.pricingGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.pricingCard {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.pricingTitle {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: var(--text);
+}
+
+.pricingPrice {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--gold);
+  font-family: 'Courier New', monospace;
+}
+
+.pricingDesc {
+  font-size: 0.75rem;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+/* Footer */
+.footer {
+  text-align: center;
+  padding: 2rem;
+  border-top: 1px solid var(--border);
+  margin-top: 2rem;
+  color: #666;
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .statsRow {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .tokenGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .pricingGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .statsRow {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .tokenGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .analysisGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .pricingGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .logo {
+    font-size: 1.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .statsRow,
+  .tokenGrid,
+  .pricingGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .analysisGrid {
+    grid-template-columns: 1fr;
+  }
+}
