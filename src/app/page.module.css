@@ -53,6 +53,94 @@
   letter-spacing: 0.02em;
 }
 
+/* Chain Bar */
+.chainBar {
+  border-bottom: 1px solid var(--border);
+  background: #0c0c0c;
+  padding: 0.75rem 2rem;
+}
+
+.chainBarInner {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.selectorGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.selectorLabel {
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.segmented {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.segBtn {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  padding: 0.3rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  font-family: 'Outfit', sans-serif;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.segBtn:not(:last-child) {
+  border-right: 1px solid var(--border);
+}
+
+.segBtn:hover:not(.segBtnDisabled) {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.segBtnActive {
+  background: rgba(200, 169, 110, 0.15);
+  color: var(--gold);
+}
+
+.segBtnDisabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.solanaBanner {
+  font-size: 0.7rem;
+  color: #888;
+  background: rgba(200, 169, 110, 0.07);
+  border: 1px solid rgba(200, 169, 110, 0.2);
+  border-radius: 4px;
+  padding: 0.25rem 0.75rem;
+  letter-spacing: 0.02em;
+}
+
+.chainTag {
+  font-size: 0.65rem;
+  color: var(--muted);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+}
+
 /* Stats Row */
 .statsRow {
   max-width: 1400px;
@@ -394,6 +482,23 @@
 .pricingToggle:hover {
   border-color: var(--gold);
   color: var(--gold);
+}
+
+.pricingChainNote {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-bottom: 0.75rem;
+}
+
+.solanaNote {
+  color: var(--gold);
+}
+
+.pricingChains {
+  font-size: 0.65rem;
+  color: var(--muted);
+  margin-top: 0.25rem;
+  letter-spacing: 0.05em;
 }
 
 .pricingGrid {

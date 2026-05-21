@@ -5,6 +5,13 @@ import styles from "./page.module.css";
 
 const TOKENS = ["BTC", "ETH", "SOL", "HYPE", "ARB"];
 
+type Chain = "base" | "solana";
+
+const CHAIN_PAYMENT_OPTIONS: Record<Chain, { usdc: boolean; jpyc: boolean }> = {
+  base: { usdc: true, jpyc: true },
+  solana: { usdc: true, jpyc: false },
+};
+
 interface TokenData {
   token: string;
   markPrice: number;
@@ -19,6 +26,7 @@ interface TokenData {
 interface AnalysisResult {
   token: string;
   analyzedAt: string;
+  chain?: string;
   hyperliquid: {
     openInterest: number;
     fundingRate: number;
@@ -55,6 +63,14 @@ function formatFunding(rate: number): string {
   return `${rate >= 0 ? "+" : ""}${rate.toFixed(4)}%`;
 }
 
+function chainLabel(chain: Chain) {
+  return chain === "base" ? "Base (EVM)" : "Solana";
+}
+
+function apiPath(base: string, chain: Chain) {
+  return chain === "solana" ? `${base}/solana` : base;
+}
+
 export default function Home() {
   const [tokenData, setTokenData] = useState<TokenData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -64,6 +80,15 @@ export default function Home() {
   const [analysisLoading, setAnalysisLoading] = useState(false);
   const [showPricing, setShowPricing] = useState(false);
   const [terminalLines, setTerminalLines] = useState<string[]>([]);
+  const [chain, setChain] = useState<Chain>("base");
+  const [currency, setCurrency] = useState<"usdc" | "jpyc">("usdc");
+
+  const paymentOptions = CHAIN_PAYMENT_OPTIONS[chain];
+
+  // Reset currency to USDC when switching to Solana
+  useEffect(() => {
+    if (chain === "solana") setCurrency("usdc");
+  }, [chain]);
 
   const addTerminalLine = (line: string) => {
     setTerminalLines((prev) => [...prev.slice(-20), `> ${line}`]);
@@ -120,12 +145,15 @@ export default function Home() {
     setSelectedToken(token);
     setAnalysisLoading(true);
     setAnalysis(null);
-    addTerminalLine(`Requesting analysis for ${token}... ($0.20)`);
+    addTerminalLine(
+      `Requesting analysis for ${token} via ${chainLabel(chain)}... ($0.20)`
+    );
 
     try {
-      const res = await fetch(`/api/hyperliquid/positions?token=${token}`);
+      const path = apiPath("/api/hyperliquid/positions", chain);
+      const res = await fetch(`${path}?token=${token}`);
       if (res.status === 402) {
-        addTerminalLine(`Payment required for ${token} analysis`);
+        addTerminalLine(`Payment required for ${token} analysis (${chainLabel(chain)})`);
         setAnalysisLoading(false);
         return;
       }
@@ -172,6 +200,52 @@ export default function Home() {
           </div>
         </div>
       </header>
+
+      {/* Chain + Currency Selector */}
+      <section className={styles.chainBar}>
+        <div className={styles.chainBarInner}>
+          <div className={styles.selectorGroup}>
+            <span className={styles.selectorLabel}>支払チェーン</span>
+            <div className={styles.segmented}>
+              {(["base", "solana"] as Chain[]).map((c) => (
+                <button
+                  key={c}
+                  className={`${styles.segBtn} ${chain === c ? styles.segBtnActive : ""}`}
+                  onClick={() => setChain(c)}
+                >
+                  {chainLabel(c)}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className={styles.selectorGroup}>
+            <span className={styles.selectorLabel}>通貨</span>
+            <div className={styles.segmented}>
+              <button
+                className={`${styles.segBtn} ${currency === "usdc" ? styles.segBtnActive : ""}`}
+                onClick={() => setCurrency("usdc")}
+              >
+                USDC
+              </button>
+              <button
+                className={`${styles.segBtn} ${currency === "jpyc" ? styles.segBtnActive : ""} ${!paymentOptions.jpyc ? styles.segBtnDisabled : ""}`}
+                onClick={() => paymentOptions.jpyc && setCurrency("jpyc")}
+                disabled={!paymentOptions.jpyc}
+                title={!paymentOptions.jpyc ? "SolanaネットワークではJPYCは利用できません" : undefined}
+              >
+                JPYC
+              </button>
+            </div>
+          </div>
+
+          {chain === "solana" && (
+            <div className={styles.solanaBanner}>
+              SolanaネットワークではUSDC決済のみご利用いただけます
+            </div>
+          )}
+        </div>
+      </section>
 
       {/* Stats Row */}
       <section className={styles.statsRow}>
@@ -238,7 +312,6 @@ export default function Home() {
 
                 <div className={styles.tokenPrice}>{formatUSD(t.markPrice)}</div>
 
-                {/* Long/Short Bias Bar */}
                 <div className={styles.biasBarLabel}>
                   <span style={{ color: "var(--green)" }}>
                     LONG {(t.smartMoneyLongRatio * 100).toFixed(0)}%
@@ -254,15 +327,13 @@ export default function Home() {
                   />
                 </div>
 
-                {/* Metrics */}
                 <div className={styles.tokenMetrics}>
                   <div className={styles.metric}>
                     <span className={styles.metricLabel}>FUNDING</span>
                     <span
                       className={styles.metricValue}
                       style={{
-                        color:
-                          t.fundingRate >= 0 ? "var(--green)" : "var(--red)",
+                        color: t.fundingRate >= 0 ? "var(--green)" : "var(--red)",
                       }}
                     >
                       {formatFunding(t.fundingRate)}
@@ -308,7 +379,7 @@ export default function Home() {
                 >
                   {analysisLoading && selectedToken === t.token
                     ? "分析中..."
-                    : "詳細分析 $0.20"}
+                    : `詳細分析 $0.20 (${chain === "solana" ? "SOL" : "Base"})`}
                 </button>
               </div>
             ))}
@@ -321,6 +392,9 @@ export default function Home() {
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>
             <span className="gold">◈</span> {analysis.token} 詳細分析
+            {analysis.chain && (
+              <span className={styles.chainTag}> [{analysis.chain.toUpperCase()}]</span>
+            )}
           </h2>
           <div className={styles.analysisCard}>
             <div className={styles.analysisHeader}>
@@ -339,8 +413,7 @@ export default function Home() {
                   {analysis.analysis?.smartMoneyBias || "—"}
                 </span>
                 <span className={styles.biasStrength}>
-                  {" "}
-                  強度{" "}
+                  {" "}強度{" "}
                   {((analysis.analysis?.biasStrength || 0) * 100).toFixed(0)}%
                 </span>
               </div>
@@ -352,10 +425,7 @@ export default function Home() {
             <div className={styles.analysisGrid}>
               <div className={styles.analysisMetric}>
                 <span className={styles.metricLabel}>スマートマネーLONG比率</span>
-                <span
-                  className={styles.metricValue}
-                  style={{ color: "var(--green)" }}
-                >
+                <span className={styles.metricValue} style={{ color: "var(--green)" }}>
                   {((analysis.hyperliquid?.smartMoneyLongRatio || 0) * 100).toFixed(1)}%
                 </span>
               </div>
@@ -375,10 +445,7 @@ export default function Home() {
               </div>
               <div className={styles.analysisMetric}>
                 <span className={styles.metricLabel}>ファンディングシグナル</span>
-                <span
-                  className={styles.metricValue}
-                  style={{ color: "var(--gold)" }}
-                >
+                <span className={styles.metricValue} style={{ color: "var(--gold)" }}>
                   {analysis.analysis?.fundingSignal || "—"}
                 </span>
               </div>
@@ -390,10 +457,7 @@ export default function Home() {
               </div>
               <div className={styles.analysisMetric}>
                 <span className={styles.metricLabel}>Polymarket確率</span>
-                <span
-                  className={styles.metricValue}
-                  style={{ color: "var(--gold)" }}
-                >
+                <span className={styles.metricValue} style={{ color: "var(--gold)" }}>
                   {((analysis.polymarket?.probability || 0) * 100).toFixed(1)}%
                 </span>
               </div>
@@ -462,16 +526,21 @@ export default function Home() {
           <button
             className={styles.hyperpsBtn}
             onClick={async () => {
-              addTerminalLine("Requesting Hyperps analysis... ($0.50)");
-              const res = await fetch("/api/hyperliquid/hyperps");
+              addTerminalLine(
+                `Requesting Hyperps analysis via ${chainLabel(chain)}... ($0.50)`
+              );
+              const path = apiPath("/api/hyperliquid/hyperps", chain);
+              const res = await fetch(path);
               if (res.status === 402) {
-                addTerminalLine("Payment required for Hyperps analysis");
+                addTerminalLine(
+                  `Payment required for Hyperps analysis (${chainLabel(chain)})`
+                );
               } else {
                 addTerminalLine("Hyperps analysis request sent");
               }
             }}
           >
-            Hyperps分析 $0.50
+            Hyperps分析 $0.50 ({chainLabel(chain)})
           </button>
         </div>
       </section>
@@ -504,36 +573,48 @@ export default function Home() {
           {showPricing ? "▲" : "▼"} 料金プラン
         </button>
         {showPricing && (
-          <div className={styles.pricingGrid}>
-            <div className={styles.pricingCard}>
-              <div className={styles.pricingTitle}>ポジション分析</div>
-              <div className={styles.pricingPrice}>$0.20</div>
-              <div className={styles.pricingDesc}>
-                トークン別スマートマネー分析 + Polymarket乖離スコア
+          <>
+            <div className={styles.pricingChainNote}>
+              現在のチェーン: <strong>{chainLabel(chain)}</strong>
+              {chain === "solana" && (
+                <span className={styles.solanaNote}> — USDC決済のみ</span>
+              )}
+            </div>
+            <div className={styles.pricingGrid}>
+              <div className={styles.pricingCard}>
+                <div className={styles.pricingTitle}>ポジション分析</div>
+                <div className={styles.pricingPrice}>$0.20</div>
+                <div className={styles.pricingDesc}>
+                  トークン別スマートマネー分析 + Polymarket乖離スコア
+                </div>
+                <div className={styles.pricingChains}>Base · Solana</div>
+              </div>
+              <div className={styles.pricingCard}>
+                <div className={styles.pricingTitle}>全体スキャン</div>
+                <div className={styles.pricingPrice}>$0.30</div>
+                <div className={styles.pricingDesc}>
+                  全トークンスキャン、乖離スコアTop10
+                </div>
+                <div className={styles.pricingChains}>Base · Solana</div>
+              </div>
+              <div className={styles.pricingCard}>
+                <div className={styles.pricingTitle}>Hyperps分析</div>
+                <div className={styles.pricingPrice}>$0.50</div>
+                <div className={styles.pricingDesc}>
+                  HIP-3上場前トークンのポジション動向
+                </div>
+                <div className={styles.pricingChains}>Base · Solana</div>
+              </div>
+              <div className={styles.pricingCard}>
+                <div className={styles.pricingTitle}>週次レポート</div>
+                <div className={styles.pricingPrice}>$2.00</div>
+                <div className={styles.pricingDesc}>
+                  週次Hyperliquidスマートマネーレポート（約2000字）
+                </div>
+                <div className={styles.pricingChains}>Base · Solana</div>
               </div>
             </div>
-            <div className={styles.pricingCard}>
-              <div className={styles.pricingTitle}>全体スキャン</div>
-              <div className={styles.pricingPrice}>$0.30</div>
-              <div className={styles.pricingDesc}>
-                全トークンスキャン、乖離スコアTop10
-              </div>
-            </div>
-            <div className={styles.pricingCard}>
-              <div className={styles.pricingTitle}>Hyperps分析</div>
-              <div className={styles.pricingPrice}>$0.50</div>
-              <div className={styles.pricingDesc}>
-                HIP-3上場前トークンのポジション動向
-              </div>
-            </div>
-            <div className={styles.pricingCard}>
-              <div className={styles.pricingTitle}>週次レポート</div>
-              <div className={styles.pricingPrice}>$2.00</div>
-              <div className={styles.pricingDesc}>
-                週次Hyperliquidスマートマネーレポート（約2000字）
-              </div>
-            </div>
-          </div>
+          </>
         )}
       </section>
 
@@ -543,7 +624,7 @@ export default function Home() {
           本ツールは情報提供のみを目的としています。投資判断はご自身でお願いします。
         </p>
         <p style={{ marginTop: "0.5rem", color: "var(--muted)", fontSize: "0.75rem" }}>
-          Powered by Hyperliquid · Nansen · Polymarket · Claude AI · x402
+          Powered by Hyperliquid · Nansen · Polymarket · Claude AI · x402 · Base · Solana
         </p>
       </footer>
     </main>
