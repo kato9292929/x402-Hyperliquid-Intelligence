@@ -6,8 +6,7 @@ const SOLANA_USDC = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 const EVM_USDC = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"; // USDC on Base
 
 export async function GET() {
-  const appUrl =
-    process.env.NEXT_PUBLIC_APP_URL ?? "https://localhost:3000";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://localhost:3000";
   const evmPayTo = process.env.WALLET_ADDRESS ?? "";
   const solanaPayTo = process.env.SOLANA_WALLET_ADDRESS ?? "";
 
@@ -19,7 +18,7 @@ export async function GET() {
       accepts: [
         {
           scheme: "exact",
-          network: "base",
+          network: "eip155:8453",
           maxAmountRequired: "200000",
           payTo: evmPayTo,
           asset: EVM_USDC,
@@ -33,7 +32,7 @@ export async function GET() {
       accepts: [
         {
           scheme: "exact",
-          network: "solana-mainnet",
+          network: "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
           maxAmountRequired: "200000",
           payTo: solanaPayTo,
           asset: SOLANA_USDC,
@@ -47,7 +46,7 @@ export async function GET() {
       accepts: [
         {
           scheme: "exact",
-          network: "base",
+          network: "eip155:8453",
           maxAmountRequired: "300000",
           payTo: evmPayTo,
           asset: EVM_USDC,
@@ -61,7 +60,7 @@ export async function GET() {
       accepts: [
         {
           scheme: "exact",
-          network: "solana-mainnet",
+          network: "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
           maxAmountRequired: "300000",
           payTo: solanaPayTo,
           asset: SOLANA_USDC,
@@ -75,7 +74,7 @@ export async function GET() {
       accepts: [
         {
           scheme: "exact",
-          network: "base",
+          network: "eip155:8453",
           maxAmountRequired: "500000",
           payTo: evmPayTo,
           asset: EVM_USDC,
@@ -89,7 +88,7 @@ export async function GET() {
       accepts: [
         {
           scheme: "exact",
-          network: "solana-mainnet",
+          network: "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
           maxAmountRequired: "500000",
           payTo: solanaPayTo,
           asset: SOLANA_USDC,
@@ -103,7 +102,7 @@ export async function GET() {
       accepts: [
         {
           scheme: "exact",
-          network: "base",
+          network: "eip155:8453",
           maxAmountRequired: "2000000",
           payTo: evmPayTo,
           asset: EVM_USDC,
@@ -117,7 +116,7 @@ export async function GET() {
       accepts: [
         {
           scheme: "exact",
-          network: "solana-mainnet",
+          network: "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
           maxAmountRequired: "2000000",
           payTo: solanaPayTo,
           asset: SOLANA_USDC,
@@ -128,7 +127,7 @@ export async function GET() {
 
   return NextResponse.json(
     {
-      x402Version: 1,
+      x402Version: 2,
       baseUrl: appUrl,
       endpoints: endpoints.map((ep) => ({
         ...ep,

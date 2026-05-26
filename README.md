@@ -11,9 +11,9 @@ x402 Hyperliquid Intelligenceは、オンチェーンPerpDEX「Hyperliquid」上
 
 x402 Hyperliquid Intelligence is an AI-powered analysis tool that aggregates smart money perpetual trading data from Hyperliquid via the Nansen API, cross-references it with Polymarket prediction market probabilities, and delivers integrated analysis powered by Claude.
 
-各APIエンドポイントは **x402プロトコル**（Base上のUSDC少額決済）で保護されており、エージェントやウォレットから直接アクセスできます。
+各APIエンドポイントは **x402プロトコル v2**（Base / Solana 上のUSDC少額決済）で保護されており、エージェントやウォレットから直接アクセスできます。ネットワーク識別子はCAIP-2形式（`eip155:8453` / `solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp`）を使用します。
 
-Each API endpoint is protected by the **x402 protocol** (micro-payments in USDC on Base), making them directly accessible by AI agents and wallets.
+Each API endpoint is protected by the **x402 protocol v2** (micro-payments in USDC on Base or Solana), making them directly accessible by AI agents and wallets. Network identifiers use CAIP-2 format (`eip155:8453` / `solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp`).
 
 ---
 
@@ -99,6 +99,14 @@ All endpoints are protected by x402. Payments are settled automatically in USDC 
 - Node.js 20+
 - npm 10+
 
+### x402 v2 + CDP Facilitator
+
+本プロジェクトは **x402 v2** を使用します。決済処理には Coinbase Developer Platform (CDP) の facilitator を推奨します。
+
+This project uses **x402 v2**. The Coinbase Developer Platform (CDP) facilitator is recommended for production payment processing.
+
+CDP API キーの取得 / Get CDP API keys: [https://portal.cdp.coinbase.com/](https://portal.cdp.coinbase.com/)
+
 ### インストール / Install
 
 ```bash
@@ -112,10 +120,26 @@ npm install
 `.env.local` を作成し以下を設定 / Create `.env.local` and configure:
 
 ```env
+# CDP API キー (x402 v2 facilitator 用・必須)
+CDP_API_KEY_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+CDP_API_KEY_SECRET=your_base64_secret==
+
+# Facilitator URL (v2)
+FACILITATOR_URL=https://api.cdp.coinbase.com/platform/v2/x402
+
+# EVM 受領ウォレット (Base)
+WALLET_ADDRESS=0xYourEvmWalletAddress
+
+# Solana 受領ウォレット (base58)
+SOLANA_WALLET_ADDRESS=YourSolanaWalletAddress
+
+# 外部 API
 NANSEN_API_KEY=your_nansen_api_key
 ANTHROPIC_API_KEY=your_anthropic_api_key
-WALLET_ADDRESS=0xYourWalletAddress
-FACILITATOR_URL=https://api.developer.coinbase.com/rpc/v1/base/facilitator
+HELIUS_RPC_URL=https://mainnet.helius-rpc.com/?api-key=your_key
+
+# アプリ URL
+NEXT_PUBLIC_APP_URL=https://your-project.vercel.app
 NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=your_walletconnect_project_id
 ```
 
@@ -165,9 +189,9 @@ x402 is a micro-payment protocol for AI agents leveraging the HTTP 402 Payment R
 ## 技術スタック / Tech Stack
 
 - **フレームワーク / Framework**: Next.js 15 (App Router)
-- **決済 / Payments**: x402-next 1.2.0
+- **決済 / Payments**: x402 v2 (`@x402/next`, `@x402/core`, `@x402/evm`, `@x402/svm`, `@coinbase/x402`)
 - **AI分析 / AI Analysis**: Anthropic Claude (`claude-sonnet-4-6`)
-- **チェーン / Chain**: Base (USDC)
+- **チェーン / Chain**: Base `eip155:8453` / Solana `solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp`
 - **UI**: React 19, CSS Modules
 - **型安全 / Type Safety**: TypeScript (strict)
 

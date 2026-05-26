@@ -4,6 +4,7 @@ import Anthropic from "@anthropic-ai/sdk";
 export const dynamic = "force-dynamic";
 
 const SOLANA_USDC = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
+const SOLANA_NETWORK = "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp";
 // $0.20 in USDC (6 decimals)
 const PRICE_AMOUNT = "200000";
 
@@ -11,11 +12,11 @@ function paymentRequired(resource: string) {
   return new NextResponse(
     JSON.stringify({
       error: "Payment Required",
-      x402Version: 1,
+      x402Version: 2,
       accepts: [
         {
           scheme: "exact",
-          network: "solana-mainnet",
+          network: SOLANA_NETWORK,
           maxAmountRequired: PRICE_AMOUNT,
           resource,
           description: "Hyperliquid Smart Money Position Analysis (Solana)",
@@ -39,19 +40,15 @@ function paymentRequired(resource: string) {
 
 export async function GET(req: Request) {
   const paymentHeader = req.headers.get("X-PAYMENT");
-  const appUrl =
-    process.env.NEXT_PUBLIC_APP_URL ?? "https://localhost:3000";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://localhost:3000";
   const resource = `${appUrl}/api/hyperliquid/positions/solana`;
 
-  if (!paymentHeader) {
-    return paymentRequired(resource);
-  }
+  if (!paymentHeader) return paymentRequired(resource);
 
   const { searchParams } = new URL(req.url);
   const token = (searchParams.get("token") || "ETH").toUpperCase();
 
   try {
-    // Nansen API
     let nansenData: Record<string, unknown> | null = null;
     if (process.env.NANSEN_API_KEY) {
       try {
@@ -65,7 +62,6 @@ export async function GET(req: Request) {
       }
     }
 
-    // Hyperliquid public API
     const hlRes = await fetch("https://api.hyperliquid.xyz/info", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -87,7 +83,6 @@ export async function GET(req: Request) {
       ? (nansenData as { longRatio?: number }).longRatio ?? 0.65
       : 0.55 + Math.random() * 0.3;
 
-    // Polymarket
     let polymarketData = { question: "", probability: 0.5 };
     try {
       const pmRes = await fetch(
@@ -108,7 +103,6 @@ export async function GET(req: Request) {
       // Polymarket unavailable
     }
 
-    // Claude analysis
     const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
     const message = await client.messages.create({
       model: "claude-sonnet-4-6",

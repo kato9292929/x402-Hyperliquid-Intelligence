@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { withX402 } from "x402-next";
+import { withX402 } from "@x402/next";
+import { x402Server } from "@/lib/x402";
 import Anthropic from "@anthropic-ai/sdk";
 
-const payTo = process.env.WALLET_ADDRESS as `0x${string}`;
+const payTo = (process.env.WALLET_ADDRESS ||
+  "0xC67d94504696960bA0f2e7C3FeE703950734c00A") as `0x${string}`;
 
 const SCAN_TOKENS = [
   "BTC", "ETH", "SOL", "HYPE", "ARB", "AVAX", "MATIC", "LINK",
@@ -11,16 +13,13 @@ const SCAN_TOKENS = [
 
 async function handler(_req: NextRequest): Promise<NextResponse<unknown>> {
   try {
-    // Fetch Hyperliquid data for all tokens
     const hlRes = await fetch("https://api.hyperliquid.xyz/info", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ type: "metaAndAssetCtxs" }),
     });
-    const hlData = await hlRes.json();
-    const [meta, assetCtxs] = hlData;
+    const [meta, assetCtxs] = await hlRes.json();
 
-    // Build token data array
     const tokenData = SCAN_TOKENS.map((token) => {
       const idx = meta.universe.findIndex(
         (u: { name: string }) => u.name === token
@@ -33,14 +32,11 @@ async function handler(_req: NextRequest): Promise<NextResponse<unknown>> {
           : 0,
         fundingRate: ctx ? parseFloat(ctx.funding) * 100 : 0,
         markPrice: ctx ? parseFloat(ctx.markPx) : 0,
-        // Simulated smart money ratio when Nansen unavailable
         smartMoneyLongRatio: 0.4 + Math.random() * 0.4,
       };
     });
 
-    // Claude analysis for divergence scoring
     const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-
     const dataStr = tokenData
       .map(
         (t) =>
@@ -78,10 +74,8 @@ ${dataStr}
     const textContent = message.content.find((c) => c.type === "text");
     let rankings: unknown[] = [];
     if (textContent && textContent.type === "text") {
-      const jsonMatch = textContent.text.match(/\[[\s\S]*\]/);
-      if (jsonMatch) {
-        rankings = JSON.parse(jsonMatch[0]);
-      }
+      const m = textContent.text.match(/\[[\s\S]*\]/);
+      if (m) rankings = JSON.parse(m[0]);
     }
 
     return NextResponse.json({
@@ -98,10 +92,19 @@ ${dataStr}
   }
 }
 
-export const GET = withX402(handler, payTo, {
-  price: "$0.30",
-  network: "base",
-  config: {
+export const GET = withX402(
+  handler,
+  {
+    accepts: [
+      {
+        scheme: "exact",
+        price: "$0.30",
+        network: "eip155:8453",
+        payTo,
+      },
+    ],
     description: "Hyperliquid Smart Money Full Scan - Top Divergences",
+    mimeType: "application/json",
   },
-});
+  x402Server
+);
