@@ -1,23 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
-import { withX402 } from "x402-next";
+import { withX402 } from "@x402/next";
+import { x402Server } from "@/lib/x402";
 import Anthropic from "@anthropic-ai/sdk";
 
-const payTo = process.env.WALLET_ADDRESS as `0x${string}`;
+const payTo = (process.env.WALLET_ADDRESS ||
+  "0xC67d94504696960bA0f2e7C3FeE703950734c00A") as `0x${string}`;
 
 const REPORT_TOKENS = ["BTC", "ETH", "SOL", "HYPE", "ARB", "AVAX", "INJ", "TIA"];
 
 async function handler(_req: NextRequest): Promise<NextResponse<unknown>> {
   try {
-    // Fetch Hyperliquid market data
     const hlRes = await fetch("https://api.hyperliquid.xyz/info", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ type: "metaAndAssetCtxs" }),
     });
-    const hlData = await hlRes.json();
-    const [meta, assetCtxs] = hlData;
+    const [meta, assetCtxs] = await hlRes.json();
 
-    // Fetch funding history for key tokens
     const fundingHistories: Record<string, unknown[]> = {};
     for (const token of ["BTC", "ETH", "SOL"]) {
       try {
@@ -30,9 +29,7 @@ async function handler(_req: NextRequest): Promise<NextResponse<unknown>> {
             startTime: Date.now() - 7 * 24 * 60 * 60 * 1000,
           }),
         });
-        if (fRes.ok) {
-          fundingHistories[token] = await fRes.json();
-        }
+        if (fRes.ok) fundingHistories[token] = await fRes.json();
       } catch {
         // Continue without funding history
       }
@@ -54,8 +51,6 @@ async function handler(_req: NextRequest): Promise<NextResponse<unknown>> {
       };
     });
 
-    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-
     const dataStr = tokenData
       .map(
         (t) =>
@@ -71,13 +66,13 @@ async function handler(_req: NextRequest): Promise<NextResponse<unknown>> {
           .map((h) =>
             parseFloat((h as { fundingRate: string }).fundingRate || "0")
           );
-        const avgRate =
-          rates.reduce((a, b) => a + b, 0) / rates.length;
+        const avgRate = rates.reduce((a, b) => a + b, 0) / rates.length;
         return `${token} 7日間平均ファンディング: ${(avgRate * 100).toFixed(4)}%/hr`;
       })
       .filter(Boolean)
       .join("\n");
 
+    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
     const message = await client.messages.create({
       model: "claude-sonnet-4-6",
       max_tokens: 4096,
@@ -123,10 +118,8 @@ ${fundingSummary || "データなし"}
     const textContent = message.content.find((c) => c.type === "text");
     let report: Record<string, unknown> = {};
     if (textContent && textContent.type === "text") {
-      const jsonMatch = textContent.text.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        report = JSON.parse(jsonMatch[0]);
-      }
+      const m = textContent.text.match(/\{[\s\S]*\}/);
+      if (m) report = JSON.parse(m[0]);
     }
 
     return NextResponse.json({
@@ -143,10 +136,19 @@ ${fundingSummary || "データなし"}
   }
 }
 
-export const GET = withX402(handler, payTo, {
-  price: "$2.00",
-  network: "base",
-  config: {
+export const GET = withX402(
+  handler,
+  {
+    accepts: [
+      {
+        scheme: "exact",
+        price: "$2.00",
+        network: "eip155:8453",
+        payTo,
+      },
+    ],
     description: "Hyperliquid Weekly Smart Money Intelligence Report",
+    mimeType: "application/json",
   },
-});
+  x402Server
+);

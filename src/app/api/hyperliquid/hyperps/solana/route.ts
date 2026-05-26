@@ -4,6 +4,7 @@ import Anthropic from "@anthropic-ai/sdk";
 export const dynamic = "force-dynamic";
 
 const SOLANA_USDC = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
+const SOLANA_NETWORK = "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp";
 // $0.50 in USDC (6 decimals)
 const PRICE_AMOUNT = "500000";
 
@@ -11,11 +12,11 @@ function paymentRequired(resource: string) {
   return new NextResponse(
     JSON.stringify({
       error: "Payment Required",
-      x402Version: 1,
+      x402Version: 2,
       accepts: [
         {
           scheme: "exact",
-          network: "solana-mainnet",
+          network: SOLANA_NETWORK,
           maxAmountRequired: PRICE_AMOUNT,
           resource,
           description: "HIP-3 Hyperperps Smart Money Position Analysis (Solana)",
@@ -39,13 +40,10 @@ function paymentRequired(resource: string) {
 
 export async function GET(req: Request) {
   const paymentHeader = req.headers.get("X-PAYMENT");
-  const appUrl =
-    process.env.NEXT_PUBLIC_APP_URL ?? "https://localhost:3000";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://localhost:3000";
   const resource = `${appUrl}/api/hyperliquid/hyperps/solana`;
 
-  if (!paymentHeader) {
-    return paymentRequired(resource);
-  }
+  if (!paymentHeader) return paymentRequired(resource);
 
   try {
     const hlRes = await fetch("https://api.hyperliquid.xyz/info", {
@@ -81,10 +79,8 @@ export async function GET(req: Request) {
           )
       )
       .sort(
-        (
-          a: { openInterest: number },
-          b: { openInterest: number }
-        ) => b.openInterest - a.openInterest
+        (a: { openInterest: number }, b: { openInterest: number }) =>
+          b.openInterest - a.openInterest
       )
       .slice(0, 20);
 
